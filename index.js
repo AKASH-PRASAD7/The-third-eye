@@ -1,22 +1,22 @@
-const input = document.getElementById("input");
-const submit = document.getElementById("submit-btn");
-
 console.log("running");
-submit.addEventListener("click", () => {
-  console.log(input.value);
-  const data = input.value;
-  document.getElementById("img").src = data;
+const form = document.querySelector("form");
+const imageContainer = document.querySelector("#image-container");
+const progress = document.getElementById("lb");
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  progress.innerHTML = "Searching...";
+
+  const formData = new FormData(form);
+
   fetch("/", {
     method: "POST",
-    body: JSON.stringify({
-      data: data,
-    }),
-    headers: {
-      "Content-Type": "application/json",
-    },
+    body: formData,
   })
-    .then((response) => response.json())
+    .then((res) => res.json())
     .then((data) => {
-      console.log(data);
+      const image = new Image();
+      image.src = data.imageURL;
+      imageContainer.appendChild(image);
     });
 });
