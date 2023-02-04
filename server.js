@@ -32,7 +32,7 @@ const upload_user = multer({ storage });
 
 //code for data connection with python
 const python_run = (data) => {
-  const python = spawn("python", ["ml-model/test.py", data]);
+  const python = spawn("python", ["ml-model/siamese_network.py", data]);
   console.log("Data send to pyhton");
   python.stdout.on("data", (data) => {
     console.log(`${data}`);
@@ -42,9 +42,6 @@ const python_run = (data) => {
   });
   python.on("close", (data) => {
     console.log(`Child Process exited with code: ${data}`);
-  });
-  python.stdout.on("data", (data) => {
-    console.log("recieved from python", data.toString());
   });
 };
 app.use("/python", (req, res) => {
@@ -66,9 +63,11 @@ app.get("/js", (req, res) => {
 });
 
 //getting image uploaded by user
+//use upload_user for having same name as img file
 app.post("/", upload.single("image"), (req, res) => {
   const img = req.file;
   res.json({ imageURL: `/uploads/user/${req.file.filename}` });
+  python_run(req.file.filename);
 });
 
 //to add persons
@@ -100,9 +99,7 @@ app.post("/person", async (req, res) => {
 
 app.get("/find", async (req, res) => {
   //for checking
-  const allperson = await model.find({
-    Person_Name: "Kotresh Parameshwarappa Karadi",
-  });
+  const allperson = await model.find({});
   if (allperson.length === 0) {
     return res.status(404).json({
       message: "No person present",
